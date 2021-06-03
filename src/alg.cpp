@@ -2,77 +2,83 @@
 #include <string>
 #include "tstack.h"
 
-int priority(char prior) {
-    if (prior == '*' || prior == '/') {
-        return 3;
-    } else {
-        if (prior == '+' || prior == '-') {
-            return 2;
-        } else if (prior == ')')
-            return 1;
-        else
-            return 0;
-    }
+int priority(char op) {
+  if (op == '(' || op == ')')
+    return 0;
+  else if (op == '+' || op == '-')
+    return 1;
+  else if (op == '*' || op == '/')
+    return 2;
 }
 
 std::string infx2pstfx(std::string inf) {
-    TStack<char> firstStack;
-    std::string strochka;
-    for (int i = 0; i < inf.length(); i++) {
-        if ((inf[i] >= '0') && (inf[i] <= '9')) {
-            strochka += inf[i];
-            strochka += ' ';
-        } else if ((inf[i] == '(') || (priority(inf[i]) > priority(firstStack.get())) || (firstStack.isEmpty())) {
-            firstStack.push(inf[i]);
-        } else if (inf[i] == ')') {
-            while (!firstStack.isEmpty() && firstStack.get() != '(') {
-                strochka += firstStack.get();
-                strochka += ' ';
-                firstStack.pop();
-            }
-            if (firstStack.get() == '(')
-                firstStack.pop();
-        } else {
-            while ((!firstStack.isEmpty()) && (priority(firstStack.get()) >= priority(inf[i]))) {
-                strochka = firstStack.get();
-                strochka += ' ';
-                firstStack.pop();
-            }
-            firstStack.push(inf[i]);
+  std::string result = "";
+  TStack<char> ops;
+  for (int i = 0; i < inf.length(); i++) {
+    if (inf[i] >= '0' && inf[i] <= '9') {
+      if (!(inf[i-1] >= '0' && inf[i-1] <= '9') && result[result.length()-1] != ' ')
+        result += ' ';
+      result += inf[i];
+    } else if (inf[i] == '(') {
+      if (result != "" && result[result.length()-1] != ' ')
+        result += ' ';
+      ops.push(inf[i]);
+    } else if (inf[i] == ')') {
+      while (ops.get() != '(') {
+        if (result[result.length()-1] != ' ')
+          result += ' ';
+        result += ops.get();
+        ops.pop();
+      }
+      ops.pop();
+    } else if (inf[i] != ' ') {
+      if (!ops.isEmpty())
+        while ((!ops.isEmpty()) && priority(ops.get()) >= priority(inf[i])) {
+          result += ' ';
+          result += ops.get();
+          ops.pop();
         }
+      ops.push(inf[i]);
     }
-    while (!firstStack.isEmpty()) {
-        strochka += firstStack.get();
-        strochka += ' ';
-        firstStack.pop();
+  }
+  while (!ops.isEmpty()) {
+      result += ' ';
+      result += ops.get();
+      ops.pop();
     }
-    return strochka;
+  if (result[0] == ' ')
+    result.erase(0, 1);
+  return result;
 }
 
 int eval(std::string pst) {
-      TStack<int> secondStack;
-    int output;
-    for (int i = 0; i < pst.length(); i++) {
-        if ((pst[i] >= '0') && (pst[i] <= '9')) {
-            secondStack.push(pst[i] - '0');
-        } else {
-            if (pst[i] != ' ') {
-                int z = secondStack.get();
-                secondStack.pop();
-                int y = secondStack.get();
-                secondStack.pop();
-                if (pst[i] == '-') {
-                    secondStack.push(y - z);
-                } else if (pst[i] == '+') {
-                    secondStack.push(y + z);
-                } else if (pst[i] == '*') {
-                    secondStack.push(y * z);
-                } else {
-                    secondStack.push(y / z);
-                }
-            }
-        }
+     int result = 0, temp = 0, x = 0, y = 0;
+  TStack<int> opns;
+  if (pst[0] >= '0' && pst[0] <= '9')
+    opns.push((int)pst[0] - 48);
+  for (int i = 1; i < pst.length(); i++) {
+    if (pst[i] >= '0' && pst[i] <= '9') {
+      if (pst[i-1] >= '0' && pst[i-1] <= '9') {
+        temp = opns.get() * 10 + (int) pst[i] - 48;
+        opns.pop();
+        opns.push(temp);
+      } else
+        opns.push((int)pst[i] - 48);
+    } else if (pst[i] != ' ') {
+      y = opns.get();
+      opns.pop();
+      x = opns.get();
+      opns.pop();
+      if (pst[i] == '+')
+        opns.push(x + y);
+      else if (pst[i] == '-')
+        opns.push(x - y);
+      else if (pst[i] == '*')
+        opns.push(x * y);
+      else if (pst[i] == '/')
+        opns.push(x / y);
     }
-    output = secondStack.get();
-    return output;
+  }
+  result = opns.get();
+  return result;
 }
