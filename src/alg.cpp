@@ -32,12 +32,13 @@ std::string infx2pstfx(std::string inf) {
       }
       ops.pop();
     } else if (inf[i] != ' ') {
-      if (!ops.isEmpty())
+      if (!ops.isEmpty()) {
         while ((!ops.isEmpty()) && priority(ops.get()) >= priority(inf[i])) {
           result += ' ';
           result += ops.get();
           ops.pop();
         }
+      }
       ops.push(inf[i]);
     }
   }
@@ -62,7 +63,7 @@ int eval(std::string pst) {
         temp = opns.get() * 10 + (int) pst[i] - 48;
         opns.pop();
         opns.push(temp);
-      } else
+      } else {
         opns.push((int)pst[i] - 48);
     } else if (pst[i] != ' ') {
       y = opns.get();
