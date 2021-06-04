@@ -71,7 +71,7 @@ opns.pop();
 x = opns.get();
 opns.pop();
 if (pst[i] == '+')
-  opns.push(x + y);
+opns.push(x + y);
 else if (pst[i] == '-')
 opns.push(x - y);
 else if (pst[i] == '*')
